@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Сторінка входу{% endblock %}
+{% block sidebar %}
+<ul class="sidebar-nav">
+    <div class="list-group">
+        <a href="{% url 'atm:index' %}"
+           class="list-group-item list-group-item-action">Повернутись на головну
+        </a>
+    </div>
+</ul>
+{% endblock %}
+{% block content %}
+<ul class="sidebar-nav">
+    {{ err_message }}
+    <form action="{% url 'atm:login' %}" method='post'>
+        {% csrf_token %}
+        <table>
+            {{ form.as_table }}
+        </table>
+        <br>
+        <button type="submit" class="btn btn-primary">Log in</button>
+    </form>
+</ul>
+{% endblock %}

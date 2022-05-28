@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Створений аккаунт{% endblock %}
+{% block sidebar %}
+<ul class="sidebar-nav">
+    <div class="list-group">
+        <a href="{% url 'atm:index' %}"
+           class="list-group-item list-group-item-action">Повернутись на головну
+        </a>
+    </div>
+</ul>
+{% endblock %}
+{% block content %}
+<ul class="sidebar-nav">
+    <table>
+
+        <p>Ваш номер рахунку (IBAN): {{ user.iban }}</p>
+        <p>Ваш номер карти: {{ user.card }}</p>
+        <p>Ваш PIN-код: 0000</p>
+        <p>Фамілія: {{ user.last_name }}</p>
+        <p>Ім'я: {{ user.first_name }}</p>
+        <p>Фінансовий номер телефону: {{ user.phone_number }}</p>
+        <p>Дата реєстрації нового рахунку: {{ user.time_create }}</p>
+    </table>
+    <a class="btn btn-primary" href="{% url 'atm:login' %}"
+       role="button">Увійти</a>
+</ul>
+{% endblock %}

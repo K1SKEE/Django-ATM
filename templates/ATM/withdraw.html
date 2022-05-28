@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Зняти готівку{% endblock %}
+{% block sidebar %}
+<ul class="sidebar-nav">
+    <div class="list-group">
+        <a href="{% url 'atm:index' %}"
+           class="list-group-item list-group-item-action">Повернутись на головну
+        </a>
+    </div>
+</ul>
+{% endblock %}
+
+
+{% block content %}
+<form action="{% url 'atm:withdraw' %}" method='POST'>
+    {% csrf_token %}
+    <table>
+        {{ form.as_table }}
+    </table>
+    <button type="submit" class="btn btn-primary">Withdraw</button>
+</form>
+{% endblock %}

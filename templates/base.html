@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <title>{% block title %}
+        {% if user.is_authenticated %}Сторінка користувача
+        {% else %}Головна сторінка
+        {% endif %}
+        {% endblock %}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+{% block rates %}
+<ul class="sidebar-nav">
+    <h3>Поточний курс валют</h3>
+    <h4>Долар США {% for rate in usd %}
+        {{ rate }}
+        {% endfor %}</h4>
+    <h4>Євро {% for rate in eur %}
+        {{ rate }}
+        {% endfor %}</h4>
+</ul>
+{% endblock %}
+{% block sidebar %}
+
+<ul class="sidebar-nav">
+    <div class="list-group">
+
+        {% if user.is_authenticated %}
+
+        <a href="{% url 'atm:logout' %}"
+           class="list-group-item list-group-item-action">LogOut</a>
+        <a href="{% url 'atm:balance' %}"
+           class="list-group-item list-group-item-action">Перевірити баланс</a>
+        <a href="{% url 'atm:deposit' %}"
+           class="list-group-item list-group-item-action">Поповнити баланс</a>
+        <a href="{% url 'atm:withdraw' %}"
+           class="list-group-item list-group-item-action">Зняти готівку</a>
+        <a href="{% url 'atm:send_money' %}"
+           class="list-group-item list-group-item-action">Перевести кошти</a>
+        <a href="{% url 'atm:new_card' %}"
+           class="list-group-item list-group-item-action">Відкрити нову
+            карту</a>
+        <a href="{% url 'atm:change_pin' %}"
+           class="list-group-item list-group-item-action">Змінити PIN-код</a>
+
+        {% else %}
+
+        <a href="{% url 'atm:login' %}"
+           class="list-group-item list-group-item-action">Залогіниться</a>
+        <a href="{% url 'atm:registration' %}"
+           class="list-group-item list-group-item-action">Відкрити новий
+            рахунок</a>
+        <a href="{% url 'admin:index' %}"
+           class="list-group-item list-group-item-action">Увійти як
+            адміністратор</a>
+
+        {% endif %}
+    </div>
+</ul>
+
+{% endblock %}
+
+{% block content %}
+
+{% if user.is_authenticated %}
+    {{ success }}
+{% endif %}
+
+{% endblock %}
+</body>
+</html>
