@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Поповнити рахунок{% endblock %}
-
+{% block title %}Змінити PIN-код{% endblock %}
 {% block sidebar %}
 <ul class="sidebar-nav">
     <div class="list-group">
@@ -12,19 +11,21 @@
 </ul>
 {% endblock %}
 
+
 {% block content %}
 <ul class="sidebar-nav">
     <div class="list-group">
-        <form action="{% url 'atm:deposit' %}" method='POST'>
+        <form action="{% url 'atm:change_pin' %}" method='POST'>
             {% csrf_token %}
             <table>
                 {{ form.as_table }}
             </table>
             <br>
-            <button type="submit" class="btn btn-primary">Поповнити</button>
+            <button type="submit" class="btn btn-primary">Змінити</button>
         </form>
         <br>
         {{ message }}
     </div>
 </ul>
+<!--{{ message }}-->
 {% endblock %}

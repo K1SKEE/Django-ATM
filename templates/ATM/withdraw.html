@@ -13,11 +13,18 @@
 
 
 {% block content %}
-<form action="{% url 'atm:withdraw' %}" method='POST'>
-    {% csrf_token %}
-    <table>
-        {{ form.as_table }}
-    </table>
-    <button type="submit" class="btn btn-primary">Withdraw</button>
-</form>
+<ul class="sidebar-nav">
+    <div class="list-group">
+        <form action="{% url 'atm:withdraw' %}" method='POST'>
+            {% csrf_token %}
+            <table>
+                {{ form.as_table }}
+            </table>
+            <br>
+            <button type="submit" class="btn btn-primary">Зняти</button>
+        </form>
+        <br>
+        {{ message }}
+    </div>
+</ul>
 {% endblock %}

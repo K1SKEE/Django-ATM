@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 
-from .forms import LogInForm, RegisterForm
-from .models import User
+from .forms import LogInForm, RegisterForm, ChangePinForm, DepositForm, \
+    WithdrawForm, OpenNewCardForm, SelectCardForm
+from .models import User, Card
 import requests
 
 
@@ -12,20 +13,17 @@ def index(request, context=None):
 
 
 def user_registration(request):
+    context = {}
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = User.objects.create_user(**form.cleaned_data)
-            context = {
-                'user': user
-            }
+            context['user'] = user
             return render(request, 'ATM/created.html',
                           concatenated_context(context))
     else:
         form = RegisterForm()
-    context = {
-        'form': form
-    }
+    context['form'] = form
     return render(request, 'ATM/registration.html',
                   concatenated_context(context))
 
@@ -42,8 +40,9 @@ def user_login(request):
             if user is not None:
                 login(request, user)
                 access = True
-                success_text = "Вы успешно вошли в систему."
+                success_text = "Ви успішно увійшли в систему."
                 context['success_text'] = success_text
+                context['user'] = user
             else:
                 form = LogInForm()
                 err_message = 'Неправильная пара логин/пароль'
@@ -66,27 +65,88 @@ def created(request):
 
 
 def balance(request):
-    pass
+    context = {
+        'balance': request.user.wallet.card.balance,
+        'card': request.user.wallet.card.card_number,
+        'currency': request.user.wallet.card.currency,
+    }
+    if request.method == 'POST':
+        form = SelectCardForm(request.POST)
+        if form.is_valid():
+            card = form.cleaned_data['card']
+    else:
+        form = SelectCardForm()
+    context['form'] = form
+    return render(request, 'ATM/balance.html', concatenated_context(context))
 
 
 def deposit(request):
-    pass
+    context = {}
+    if request.method == 'POST':
+        form = DepositForm(request.POST)
+        if form.is_valid():
+            value = form.cleaned_data['value']
+            request.user.wallet.card.deposit(value)
+            context['message'] = f'Баланс поповнено на {value} \
+                                    {request.user.wallet.card.get_currency()}'
+    else:
+        form = DepositForm()
+    context['form'] = form
+    return render(request, 'ATM/deposit.html', concatenated_context(context))
 
 
 def withdraw(request):
-    pass
+    context = {}
+    if request.method == 'POST':
+        form = WithdrawForm(request.POST)
+        if form.is_valid():
+            value = form.cleaned_data['value']
+            message = request.user.wallet.card.withdraw(value)
+            context['message'] = message
+    else:
+        form = WithdrawForm()
+    context['form'] = form
+    return render(request, 'ATM/withdraw.html', concatenated_context(context))
 
 
 def send_money(request):
-    pass
+    context = {}
+    return render(request, '', concatenated_context(context))
 
 
 def new_card(request):
-    pass
+    context = {}
+    if request.method == 'POST':
+        form = OpenNewCardForm(request.POST)
+        if form.is_valid():
+            currency = form.cleaned_data['currency']
+            card = Card()
+            card.create_card()
+            card.currency = currency
+            card.save()
+            request.user.wallet.card = card
+    else:
+        form = OpenNewCardForm()
+    context['form'] = form
+    return render(request, 'ATM/new_card.html', concatenated_context(context))
 
 
 def change_pin(request):
-    pass
+    context = {}
+    if request.method == 'POST':
+        form = ChangePinForm(request.POST)
+        if form.is_valid():
+            pin1, pin2 = form.cleaned_data['pin1'], form.cleaned_data['pin2']
+            if pin1 == pin2:
+                context['message'] = 'PIN-код успішно змінений'
+                request.user.set_password(pin2)
+                request.user.save()
+            else:
+                context['message'] = 'pin 1 != pin 2'
+    else:
+        form = ChangePinForm()
+    context['form'] = form
+    return render(request, 'ATM/change_pin.html', concatenated_context(context))
 
 
 def get_currency_rate():

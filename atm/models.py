@@ -19,9 +19,8 @@ class UserManager(BaseUserManager):
         username = self._create_card()
         user.create_iban()
         user.username = username
-        user.card_id = username
+
         user.atm = ATM.objects.get(pk=1)
-        # user.add_card(username)
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -44,6 +43,11 @@ class UserManager(BaseUserManager):
         card.save()
         return card.card_number
 
+    @staticmethod
+    def _create_wallet():
+        wallet = Wallet()
+        return wallet
+
 
 class ATM(models.Model):
     objects = models.Manager()
@@ -54,6 +58,9 @@ class ATM(models.Model):
 
     def __str__(self):
         return str(self.balance)
+
+    def get_balance(self):
+        return self.balance
 
 
 class Card(models.Model):
@@ -80,7 +87,7 @@ class Card(models.Model):
     )
 
     def __str__(self):
-        return self.card_number
+        return f'{self.currency} {self.card_number}'
 
     def create_card(self):
         random_card = [str(randint(0, 9)) for _ in range(12)]
@@ -91,17 +98,32 @@ class Card(models.Model):
     def get_balance(self):
         return str(self.balance)
 
-    def get_card_number(self):
-        return self.card_number
+    def deposit(self, value):
+        atm = ATM.objects.get(pk=1)
+        atm.balance += value
+        self.balance += value
+        atm.save()
+        return self.save()
 
-    def get_currency(self):
-        return self.currency
+    def withdraw(self, value):
+        atm = ATM.objects.get(pk=1)
+        if value <= atm.get_balance() and value <= self.balance:
+            self.balance -= value
+            atm.balance -= value
+            atm.save()
+            self.save()
+            return f'Знято {value}'
+        return f'На вашому рахунку недостатньо коштів для зняття {value} ' \
+               f'{self.currency}' if value > self.balance else \
+            'В банкоматі недостатньо готівки'
 
-    def _deposit(self, value):
-        pass
 
-    def _withdraw(self, value):
-        pass
+class Wallet(models.Model):
+    card = models.OneToOneField(
+        'Card',
+        on_delete=models.PROTECT,
+        null=True
+    )
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -122,10 +144,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         _("PIN-код"),
         max_length=4, default='0000'
     )
-    card = models.OneToOneField(
-        Card,
-        on_delete=models.PROTECT,
-        null=True
+    wallet = models.OneToOneField(
+        Wallet, on_delete=models.PROTECT,
+        blank=True
     )
     last_name = models.CharField(
         max_length=30,
@@ -176,9 +197,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         code = '0000'
         random_iban = [str(randint(0, 9)) for _ in range(12)]
         new_iban = country + code + ''.join(random_iban)
-        self.iban = new_iban
-        return self.iban
+        return self.set_iban(new_iban)
 
-    # def add_card(self, card_id):
-    #     card = Card.objects.get(card_number=card_id)
-    #     return self.wallet.__setattr__(card.currency, card.card_number)
+    def set_iban(self, iban):
+        self.iban = iban
+        return self.iban

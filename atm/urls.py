@@ -1,5 +1,4 @@
 from django.urls import path
-# from django.contrib.auth import authenticate, login
 from . import views
 
 app_name = 'atm'

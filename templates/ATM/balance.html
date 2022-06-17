@@ -1,1 +1,26 @@
 {% extends 'base.html' %}
+
+{% block title %}Баланс рахунку{% endblock %}
+
+{% block content %}
+<ul class="sidebar-nav">
+    <div class="list-group">
+        <form action="{% url 'atm:balance' %}" method='POST'>
+            {% csrf_token %}
+            <table>
+                {{ form.as_table }}
+            </table>
+            <br>
+            <button type="submit" class="btn btn-primary">Оберіть карту
+            </button>
+        </form>
+        <br>
+        {{ message }}
+    </div>
+</ul>
+<ul class="sidebar-nav">
+    <div class="list-group">
+        <h1>Баланс рахунку {{ card }}: {{ balance }} {{ currency }} </h1>
+    </div>
+</ul>
+{% endblock %}
